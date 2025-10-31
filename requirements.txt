@@ -1,3 +1,4 @@
 lgpio==0.2.2.0
 pygame==2.6.1
 rpi-lgpio==0.6
+Flask==3.0.0
