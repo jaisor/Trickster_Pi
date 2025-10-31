@@ -1,5 +1,7 @@
 import pygame
 import time
+import os
+import random
 from threading import Thread
 
 import RPi.GPIO as GPIO
@@ -22,8 +24,42 @@ servo_pwm.start(0)
 # Initialize pygame mixer for audio
 pygame.mixer.init()
 
-# Audio file path
-AUDIO_FILE = "/mnt/samba/Scary-Laugh_AdobeStock_547309208.wav"  # Replace with your MP3 file path
+# Audio folder path
+AUDIO_FOLDER = "/mnt/samba/"  # Replace with your audio folder path
+
+# List to store preloaded pygame Sound objects
+preloaded_sounds = []
+
+def load_audio_files():
+    """Load and preload all .wav and .mp3 files from the specified folder"""
+    global preloaded_sounds
+    preloaded_sounds = []
+    
+    if not os.path.exists(AUDIO_FOLDER):
+        print(f"Warning: Audio folder '{AUDIO_FOLDER}' does not exist.")
+        return
+    
+    try:
+        for filename in os.listdir(AUDIO_FOLDER):
+            if filename.lower().endswith(('.wav', '.mp3')):
+                full_path = os.path.join(AUDIO_FOLDER, filename)
+                
+                try:
+                    # Preload the audio file into pygame mixer
+                    sound = pygame.mixer.Sound(full_path)
+                    preloaded_sounds.append(sound)
+                    print(f"  Preloaded: {filename}")
+                    
+                except pygame.error as e:
+                    print(f"  Failed to load {filename}: {e}")
+                    continue
+        
+        print(f"Successfully preloaded {len(preloaded_sounds)} audio files from {AUDIO_FOLDER}")
+        if not preloaded_sounds:
+            print("No valid .wav or .mp3 files found or loaded in the audio folder.")
+            
+    except Exception as e:
+        print(f"Error loading audio files: {e}")
 
 def set_servo_angle(angle):
     """Set servo to specific angle (0-180 degrees)"""
@@ -33,14 +69,25 @@ def set_servo_angle(angle):
     servo_pwm.ChangeDutyCycle(0)  # Stop sending signal
 
 def play_audio():
-    """Play MP3 file"""
+    """Play a random preloaded audio file"""
+    if not preloaded_sounds:
+        print("No audio files available to play.")
+        return
+    
     try:
-        pygame.mixer.music.load(AUDIO_FILE)
-        pygame.mixer.music.play()
-        while pygame.mixer.music.get_busy():
+        # Select a random preloaded sound and corresponding filename
+        sound_index = random.randint(0, len(preloaded_sounds) - 1)
+        selected_sound = preloaded_sounds[sound_index]
+        
+        # Play the preloaded sound
+        selected_sound.play()
+        
+        # Wait for the sound to finish playing
+        while pygame.mixer.get_busy():
             time.sleep(0.1)
-    except pygame.error as e:
-        print(f"Audio error: {e}")
+            
+    except Exception as e:
+        print(f"Error playing audio: {e}")
 
 def rotate_servo():
     """Rotate servo from 0 to 180 degrees and back"""
@@ -69,7 +116,10 @@ def button_callback(channel):
     print("Action completed!")
 
 def main():
-
+    # Load audio files at startup
+    load_audio_files()
+    
+    # Test the button callback
     button_callback(1)
 
     try:
