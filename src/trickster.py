@@ -5,7 +5,7 @@ from threading import Thread
 import RPi.GPIO as GPIO
 
 # GPIO pin definitions
-BUTTON_PIN = 18
+BUTTON_PIN = 17
 SERVO_PIN = 12
 LED_PIN = 16  # Optional status LED
 
@@ -23,7 +23,7 @@ servo_pwm.start(0)
 pygame.mixer.init()
 
 # Audio file path
-AUDIO_FILE = "audio.mp3"  # Replace with your MP3 file path
+AUDIO_FILE = "/mnt/samba/Scary-Laugh_AdobeStock_547309208.wav"  # Replace with your MP3 file path
 
 def set_servo_angle(angle):
     """Set servo to specific angle (0-180 degrees)"""
@@ -69,6 +69,9 @@ def button_callback(channel):
     print("Action completed!")
 
 def main():
+
+    button_callback(1)
+
     try:
         # Add button press detection
         GPIO.add_event_detect(BUTTON_PIN, GPIO.FALLING, 
