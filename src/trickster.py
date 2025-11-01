@@ -76,8 +76,8 @@ def set_servo_angle(angle):
     """Set servo to specific angle (0-180 degrees)"""
     duty_cycle = 2 + (angle / 18)
     servo_pwm.ChangeDutyCycle(duty_cycle)
-    time.sleep(0.5)
-    servo_pwm.ChangeDutyCycle(0)  # Stop sending signal
+#    time.sleep(0.5)
+#    servo_pwm.ChangeDutyCycle(0)  # Stop sending signal
 
 def play_audio():
     """Play multiple random audio files in sequence for at least 60 seconds"""
@@ -147,11 +147,10 @@ def play_random_sound():
         return {"success": False, "message": error_msg}
 
 def rotate_servo():
-    """Rotate servo from 0 to 180 degrees and back"""
-    angles = [0, 90, 180, 90, 0]
-    for angle in angles:
-        set_servo_angle(angle)
-        time.sleep(0.5)
+    """Rotate servo"""
+    set_servo_angle(160)
+    time.sleep(3)
+    set_servo_angle(10)
 
 def button_callback(channel):
     """Handle button press with random delay and ignore concurrent presses"""
@@ -201,6 +200,12 @@ def button_callback(channel):
 def api_play_sound():
     """REST API endpoint to play a random sound"""
     result = play_random_sound()
+    return jsonify(result)
+
+@app.route('/serv', methods=['GET'])
+def api_serv():
+    """REST API endpoint to serv"""
+    result = rotate_servo()
     return jsonify(result)
 
 @app.route('/status', methods=['GET'])
@@ -293,6 +298,9 @@ def run_gpio_monitor():
         print(f"GPIO monitoring error: {e}")
 
 def main():
+
+    set_servo_angle(10)
+
     # Load audio files at startup
     load_audio_files()
     
